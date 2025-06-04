@@ -14,6 +14,7 @@ import java.util.UUID;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final NotificationProducer notificationProducer; //
 
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
@@ -31,7 +32,9 @@ public class BookService {
     }
 
     public Book saveBook(Book book) {
-        return bookRepository.save(book);
+        Book saved = bookRepository.save(book);
+        notificationProducer.send(" Збережено книгу: " + saved.getTitle()); //  відправка
+        return saved;
     }
 
     public Book updateBook(UUID id, Book bookDetails) {
@@ -43,7 +46,10 @@ public class BookService {
                     book.setDescription(bookDetails.getDescription());
                     book.setPublicationYear(bookDetails.getPublicationYear());
                     book.setFileUrl(bookDetails.getFileUrl());
-                    return bookRepository.save(book);
-                }).orElseThrow(() -> new RuntimeException("Book not found"));
+                    Book updated = bookRepository.save(book);
+                    notificationProducer.send(" Оновлено книгу: " + updated.getTitle()); // 📤 відправка
+                    return updated;
+                })
+                .orElseThrow(() -> new RuntimeException("Book not found"));
     }
 }

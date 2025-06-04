@@ -14,6 +14,7 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final NotificationProducer notificationProducer;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -24,10 +25,14 @@ public class UserService {
     }
 
     public User saveUser(User user) {
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+        notificationProducer.send("Збережено користувача: " + saved.getEmail());
+        return saved;
     }
 
     public void deleteUser(UUID id) {
+        Optional<User> user = userRepository.findById(id);
         userRepository.deleteById(id);
+        user.ifPresent(u -> notificationProducer.send("Видалено користувача: " + u.getEmail()));
     }
 }

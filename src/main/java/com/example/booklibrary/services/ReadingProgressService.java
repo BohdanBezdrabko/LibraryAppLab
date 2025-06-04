@@ -14,13 +14,16 @@ import java.util.UUID;
 public class ReadingProgressService {
 
     private final ReadingProgressRepository readingProgressRepository;
+    private final NotificationProducer notificationProducer;
 
     public List<ReadingProgress> getReadingProgressByUserId(UUID userId) {
         return readingProgressRepository.findByUserId(userId);
     }
 
     public ReadingProgress saveReadingProgress(ReadingProgress readingProgress) {
-        return readingProgressRepository.save(readingProgress);
+        ReadingProgress saved = readingProgressRepository.save(readingProgress);
+        notificationProducer.send("Збережено прогрес читання для книги з ID: " + saved.getId());
+        return saved;
     }
 
     public ReadingProgress updateReadingProgress(UUID id, ReadingProgress progressDetails) {
@@ -29,7 +32,9 @@ public class ReadingProgressService {
                     progress.setCurrentPage(progressDetails.getCurrentPage());
                     progress.setPercentageRead(progressDetails.getPercentageRead());
                     progress.setUpdatedAt(progressDetails.getUpdatedAt());
-                    return readingProgressRepository.save(progress);
+                    ReadingProgress updated = readingProgressRepository.save(progress);
+                    notificationProducer.send("Оновлено прогрес читання для книги з ID: " + updated.getId());
+                    return updated;
                 }).orElseThrow(() -> new RuntimeException("Progress not found"));
     }
 }

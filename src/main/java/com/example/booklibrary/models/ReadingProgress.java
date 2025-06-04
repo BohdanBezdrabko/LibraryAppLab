@@ -25,3 +25,4 @@ public class ReadingProgress {
     @Column(updatable = true)
     private String updatedAt;
 }
+
